@@ -1,7 +1,6 @@
-/** Connect to Moralis server */
-const serverUrl = "https://xxxxx.yourserver.com:2053/server";
-const appId = "YOUR_APP_ID";
-Moralis.start({ serverUrl, appId });
+// Connect to Moralis server
+Moralis.initialize("yOGw5F1DxY2eA9ByFSlvoze95s9woOjLcHzxgm9Y");
+Moralis.serverURL = "https://okraypjofzst.usemoralis.com:2053/server"
 
 /** Add from here down */
 async function login() {
