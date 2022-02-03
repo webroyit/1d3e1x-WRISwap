@@ -20,3 +20,12 @@
     width: 50%;
     float: left;
 }
+
+.token_select {
+    padding: 5px 0;
+}
+
+.token_select:hover {
+    background-color: #464646;
+    cursor: pointer;
+}
