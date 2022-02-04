@@ -9,10 +9,27 @@ async function init() {
 }
 
 async function listAvailableTokens() {
-  const tokens = await Moralis.Plugins.oneInch.getSupportedTokens({
+  const result = await Moralis.Plugins.oneInch.getSupportedTokens({
     chain: 'eth', // The blockchain you want to use (eth/bsc/polygon)
   });
-  console.log(tokens);
+
+  const tokens = result.tokens;
+  let parent = document.getElementById("token_list");
+
+  // Create a list of tokens in HTML
+  for(const address in tokens){
+    let token = tokens[address];
+    let div = document.createElement('div');    // Create div element
+    div.className = "token_row";                // Set the class name of the div element
+    let html = `
+      <img class="token_list_img" src="${token.logoURI}">
+      <span class="token_list_text">${token.symbol}</span>
+    `;
+
+    div.innerHTML = html;
+    parent.appendChild(div);                    // Instead the list to the modal
+  }
+  console.log(result);
 }
 
 async function login() {
