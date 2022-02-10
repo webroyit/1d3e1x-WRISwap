@@ -30,7 +30,7 @@
     cursor: pointer;
 }
 
-.token_list_img {
+.token_list_img, .token_image {
     width: 40px;
 }
 

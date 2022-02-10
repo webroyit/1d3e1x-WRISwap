@@ -32,17 +32,28 @@ async function listAvailableTokens() {
     `;
 
     div.innerHTML = html;
-    div.onclick = selectToken;
+    div.onclick = (() => {selectToken(address)});
     parent.appendChild(div);                    // Instead the list to the modal
   }
   console.log(result);
 }
 
-async function selectToken() {
+function selectToken(address) {
   closeModal();
-  let address = event.target.getAttribute("data-address");
   currentTrade[currentSelectSide] = tokens[address];
   console.log(currentTrade);
+  renderInterface();
+}
+
+function renderInterface() {
+  if(currentTrade.from){
+    document.getElementById("from_token_img").src = currentTrade.from.logoURI;
+    document.getElementById("from_token_text").innerHTML = currentTrade.from.symbol;
+  } 
+  if(currentTrade.to){
+    document.getElementById("to_token_img").src = currentTrade.to.logoURI;
+    document.getElementById("to_token_text").innerHTML = currentTrade.to.symbol;
+  }
 }
 
 async function login() {
@@ -70,5 +81,6 @@ function closeModal() {
 init();
 
 document.getElementById("from_token_select").onclick = () => {openModal("from")};
+document.getElementById("to_token_select").onclick = () => {openModal("to")};
 document.getElementById("modal_close").onclick = closeModal;
 document.getElementById("login_button").onclick = login;
