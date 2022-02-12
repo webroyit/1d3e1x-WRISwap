@@ -78,9 +78,27 @@ function closeModal() {
   document.getElementById("token_modal").style.display = "none";
 }
 
+async function getQuote () {
+  if(!currentTrade.from || !currentTrade.to || !document.getElementById("from_amount").value) return;
+
+  let amount = Number(document.getElementById("from_amount").value * 10 ** currentTrade.from.decimals);
+
+  // Get the price
+  const quote = await Moralis.Plugins.oneInch.quote({
+    chain: 'eth',
+    fromTokenAddress: currentTrade.from.address,
+    toTokenAddress: currentTrade.to.address,
+    amount: amount 
+  });
+
+  console.log(quote);
+  document.getElementById("to_amount").value = quote.toTokenAmount / (10 ** quote.toToken.decimals);
+}
+
 init();
 
 document.getElementById("from_token_select").onclick = () => {openModal("from")};
 document.getElementById("to_token_select").onclick = () => {openModal("to")};
 document.getElementById("modal_close").onclick = closeModal;
 document.getElementById("login_button").onclick = login;
+document.getElementById("from_amount").onblur = getQuote;
