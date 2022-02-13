@@ -5,11 +5,17 @@ Moralis.serverURL = "https://okraypjofzst.usemoralis.com:2053/server"
 let currentTrade = {};
 let currentSelectSide;
 let tokens;
+let currentUser;
 
 async function init() {
   await Moralis.initPlugins();
   await Moralis.enable();
   await listAvailableTokens();
+
+  currentUser = Moralis.User.current();
+  if(!currentUser){
+    document.getElementById("swap_button").disabled = false;
+  }
 }
 
 async function listAvailableTokens() {
@@ -58,15 +64,14 @@ function renderInterface() {
 }
 
 async function login() {
-  let user = Moralis.User.current();
-  if (!user) {
-   try {
-      user = await Moralis.authenticate({ signingMessage: "Hello World!" })
-      console.log(user)
-      console.log(user.get('ethAddress'))
-   } catch(error) {
-     console.log(error)
-   }
+  try {
+    currentUser = Moralis.User.current();
+    if(!currentUser){
+      currentUser = await Moralis.Web3.authenticate();
+    }
+    document.getElementById("swap_button").disabled = false;
+  } catch(error) {
+    console.log(error)
   }
 }
 
@@ -97,6 +102,47 @@ async function getQuote () {
   document.getElementById("to_amount").value = quote.toTokenAmount / (10 ** quote.toToken.decimals);
 }
 
+// Get token allowance and approve using 1Inch
+async function trySwap() {
+  let address = Moralis.User.current().get("ethAddress");
+  let amount = Number(document.getElementById("from_amount").value * 10 ** currentTrade.from.decimals);
+  
+  if(currentTrade.from.symbol !== "ETH") {
+    // Check Allowance
+    // Return true or false
+    const allowance = await Moralis.Plugins.oneInch.hasAllowance({
+      chain: 'eth',
+      fromTokenAddress: currentTrade.from.address,
+      fromAddress: address,
+      amount: amount 
+    })
+
+    console.log(allowance);
+    if(!allowance) {
+      // Approve token spend
+      await Moralis.Plugins.oneInch.approve({
+        chain: 'eth',
+        tokenAddress: currentTrade.from.address,
+        fromAddress: address
+      })
+    }
+  }
+  let receipt = await doSwap(address, amount);
+  alert("Swap Finish")
+}
+
+// Swap tokens using 1Inch
+function doSwap(userAddress, amount) {
+  return Moralis.Plugins.oneInch.swap({
+    chain: 'eth', // The blockchain you want to use (eth/bsc/polygon)
+    fromTokenAddress: currentTrade.from.address, // The token you want to swap
+    toTokenAddress: currentTrade.to.address, // The token you want to receive
+    amount: amount,
+    fromAddress: userAddress, // Your wallet address
+    slippage: 1,
+  });
+}
+
 init();
 
 document.getElementById("from_token_select").onclick = () => {openModal("from")};
@@ -104,3 +150,4 @@ document.getElementById("to_token_select").onclick = () => {openModal("to")};
 document.getElementById("modal_close").onclick = closeModal;
 document.getElementById("login_button").onclick = login;
 document.getElementById("from_amount").onblur = getQuote;
+document.getElementById("swap_button").onclick = trySwap;
