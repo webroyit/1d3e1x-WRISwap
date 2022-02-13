@@ -43,6 +43,7 @@ function selectToken(address) {
   currentTrade[currentSelectSide] = tokens[address];
   console.log(currentTrade);
   renderInterface();
+  getQuote();
 }
 
 function renderInterface() {
@@ -92,6 +93,7 @@ async function getQuote () {
   });
 
   console.log(quote);
+  document.getElementById("gas_estimate").innerHTML = quote.estimatedGas;
   document.getElementById("to_amount").value = quote.toTokenAmount / (10 ** quote.toToken.decimals);
 }
 
